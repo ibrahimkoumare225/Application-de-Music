@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CLI : Choix d'un instrument + mode de jeu
+Main.py : CLI choix instrument + mode + génération de son
 """
 
+import random
+from MusicPlayer_Base import MusicPlayer
+from note_frequence_base import note_to_frequency
+from Instrument import Flute, Guitare, Batterie   # <-- fichier où tu as défini tes classes
+
 INSTRUMENTS = {
-    "flute": "flûte",
-    "flûte": "flûte",
-    "guitare": "guitare",
-    "batterie": "batterie",
-    "drums": "batterie",
-    "drum": "batterie"
+    "flûte": Flute,
+    "flute": Flute,
+    "guitare": Guitare,
+    "batterie": Batterie,
+    "drums": Batterie,
+    "drum": Batterie
 }
 
 MODES = {
@@ -70,13 +75,52 @@ def choisir_mode():
         else:
             print("❌ Entrée invalide, réessayez.\n")
 
+def mode_aleatoire(instrument):
+    notes = random.sample(list(note_to_frequency.keys()), 5)
+    print(f"🎲 Notes générées aléatoirement : {notes}")
+    for note in notes:
+        instrument.jouer(note, 0.5)
+
+def mode_clavier(instrument):
+    print("⌨️ Entrez des notes (ex: C4, E4, A3). Tapez 'q' pour quitter.")
+    while True:
+        note = input("Note : ").strip()
+        if note.lower() == "q":
+            break
+        if note in note_to_frequency:
+            instrument.jouer(note, 0.7)
+        else:
+            print("❌ Note inconnue.")
+
+def mode_fichier(instrument):
+    chemin = input("Entrez le chemin du fichier de notes (.txt) : ").strip()
+    try:
+        with open(chemin, "r") as f:
+            notes = [line.strip() for line in f if line.strip()]
+        print(f"📂 Notes lues : {notes}")
+        for note in notes:
+            if note in note_to_frequency:
+                instrument.jouer(note, 0.7)
+            else:
+                print(f"❌ Note '{note}' inconnue, ignorée.")
+    except FileNotFoundError:
+        print("❌ Fichier introuvable.")
+
 if __name__ == "__main__":
-    instrument = choisir_instrument()
-    if instrument:
-        print(f"\n🎶 Vous avez choisi l’instrument : {instrument}")
+    instrument_nom = choisir_instrument()
+    if instrument_nom:
+        mp = MusicPlayer()
+        instrument_class = INSTRUMENTS[instrument_nom]
+        instrument = instrument_class(mp)
+
+        print(f"\n🎶 Vous avez choisi l’instrument : {instrument.nom}")
         mode = choisir_mode()
-        if mode:
-            print(f"👉 Mode sélectionné : {mode}")
+        if mode == "aléatoire":
+            mode_aleatoire(instrument)
+        elif mode == "clavier":
+            mode_clavier(instrument)
+        elif mode == "fichier":
+            mode_fichier(instrument)
         else:
             print("Fin du programme.")
     else:
