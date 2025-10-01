@@ -1,3 +1,4 @@
+
 import pygame
 import numpy as np
 from note_frequence_base import note_to_frequency
@@ -84,3 +85,4 @@ while running:
     pygame.display.flip()
 
 pygame.quit()
+
