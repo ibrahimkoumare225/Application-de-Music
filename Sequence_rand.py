@@ -37,15 +37,30 @@ class MusicPlayer:
         pygame.time.delay(int(duration * 1000))
 
 
-def generate_random_sequence(length=20):
-    """Génère une séquence aléatoire de (note, fréquence, durée)."""
+def generate_random_sequence(length=20, mode="mixte"):
+    """Génère une séquence de (note, fréquence, durée) selon le mode choisi."""
     notes = list(note_to_frequency.keys())
     sequence = []
+
+    # Définir la durée selon le mode choisi
+    if mode == "lent":
+        fixed_duration = 0.5
+    elif mode == "moyen":
+        fixed_duration = 1.5
+    elif mode == "long":
+        fixed_duration = 3.0
+    else:
+        fixed_duration = None  # mixte => aléatoire
+
     for _ in range(length):
         note = random.choice(notes)
         freq = note_to_frequency[note]
-        # durée aléatoire entre 0.5 et 3 secondes
-        duration = random.uniform(0.5, 3.0)
+
+        if fixed_duration is not None:
+            duration = fixed_duration
+        else:
+            duration = random.uniform(0.5, 3.0)
+
         sequence.append((note, freq, duration))
     return sequence
 
@@ -63,25 +78,45 @@ def ask_sequence_length():
             print("Veuillez entrer un nombre entier valide.")
 
 
+def ask_duration_mode():
+    """Demande à l'utilisateur le mode de durée des notes."""
+    modes = {
+        "1": ("lent", "0.5 s"),
+        "2": ("moyen", "1.5 s"),
+        "3": ("long", "3.0 s"),
+        "4": ("mixte", "durées aléatoires (0.5–3.0 s)")
+    }
+
+    print("\nChoisissez la durée des notes :")
+    for k, (m, desc) in modes.items():
+        print(f"{k}. {m.capitalize()} ({desc})")
+
+    while True:
+        choice = input("Votre choix (1-4) : ").strip()
+        if choice in modes:
+            return modes[choice][0]
+        print("❌ Choix invalide, veuillez entrer 1, 2, 3 ou 4.")
+
+
 def main():
     mp = MusicPlayer()
 
     # Demander le nombre de notes
     length = ask_sequence_length()
 
+    # Demander le mode de durée
+    mode = ask_duration_mode()
+
     # Générer et jouer la séquence
     if length >= 100:
         play_guitar_hero(length)
     else:
-        seq = generate_random_sequence(length=length)
-        for note, freq, dur in seq:
-            print(
-                f"Lecture : {note}, Fréquence : {freq} Hz, Durée : {dur:.2f} s")
+        seq = generate_random_sequence(length=length, mode=mode)
+        for i, (note, freq, dur) in enumerate(seq, start=1):
+            print(f"[{i}/{length}] Lecture : {note}, {freq} Hz, Durée : {dur:.2f} s")
             mp.play(freq, dur)
 
-    print("✅ Séquence aléatoire terminée.")
-    # ❌ Ne pas quitter pygame ni appeler sys.exit() ici
-    # pygame.quit()   <-- à éviter si tu veux rejouer plus tard
+    print("\n✅ Séquence aléatoire terminée.")
 
 
 if __name__ == "__main__":

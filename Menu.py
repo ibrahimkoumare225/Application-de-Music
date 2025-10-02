@@ -322,8 +322,8 @@ class Menu:
     }
 
     MODES = {
-        "1": "fichier",
-        "2": "clavier",
+        "2": "fichier",
+        "1": "clavier",
         "3": "aléatoire",
         "fichier": "fichier",
         "clavier": "clavier",
@@ -346,8 +346,8 @@ class Menu:
 
     def afficher_menu_modes(self):
         print("\n=== Choix du mode de jeu ===")
-        print("1) À partir d’un fichier")
-        print("2) Notes au clavier (a–z / interface piano)")
+        print("1) Notes au clavier (a–z / interface piano)")
+        print("2) À partir d’un fichier")
         print("3) Aléatoire")
         print("q) Quitter\n")
 
