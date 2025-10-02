@@ -3,38 +3,45 @@
 """
 CLI orientée objet : Choix d'un instrument + mode de jeu
 """
-from MusicPlayer_base_original import MusicPlayer
+import random
+from MusicPlayer_base_original import MusicPlayer, note_to_frequency
+from Instrument import Piano, Guitare, Batterie, Flute
 
 
 def normaliser(texte: str) -> str:
+    return texte.strip().lower()
     return texte.strip().lower()
 
 
 class Menu:
     INSTRUMENTS = {
-        "flute": "flûte",
-        "flûte": "flûte",
-        "guitare": "guitare",
-        "batterie": "batterie",
-        "piano": "piano",
-        "drums": "batterie",
-        "drum": "batterie"
+        "1": Piano,
+        "2": Guitare,
+        "3": Batterie,
+        "4": Flute,
+        "piano": Piano,
+        "guitare": Guitare,
+        "batterie": Batterie,
+        "flute": Flute,
+        "flûte": Flute,
+        "drum": Batterie,
+        "drums": Batterie,
     }
 
     MODES = {
-        
-        "1": "clavier",
-        "2": "aléatoire",
-        "3": "fichier",
+        "1": "fichier",
+        "2": "clavier",
+        "3": "aléatoire",
+        "fichier": "fichier",
+        "clavier": "clavier",
         "aleatoire": "aléatoire",
         "aléatoire": "aléatoire",
-        "clavier": "clavier",
-        "fichier": "fichier"
     }
 
     def __init__(self):
         self.instrument = None
         self.mode = None
+        self.player = MusicPlayer()
 
     def afficher_menu_instruments(self):
         print("=== Choix de l'instrument ===")
@@ -42,31 +49,22 @@ class Menu:
         print("2) Guitare")
         print("3) Batterie")
         print("4) Flûte")
-        print("q) Quitter")
-        print()
+        print("q) Quitter\n")
 
     def afficher_menu_modes(self):
         print("\n=== Choix du mode de jeu ===")
-        print("1) Notes au clavier")
-        print("2) Aléatoire")
-        print("3) À partir d’un fichier")
-        print("q) Quitter")
-        print()
+        print("1) À partir d’un fichier")
+        print("2) Notes au clavier (a–z)")
+        print("3) Aléatoire")
+        print("q) Quitter\n")
 
     def choisir_instrument(self):
         while True:
             self.afficher_menu_instruments()
             choix = normaliser(
                 input("Entrez le numéro ou le nom de l'instrument : "))
-
-            if choix in ("1", "piano"):
-                return "piano"
-            elif choix in ("2", "guitare"):
-                return "guitare"
-            elif choix in ("3", "batterie", "drum", "drums"):
-                return "batterie"
-            elif choix in ("4", "flute", "flûte"):
-                return "flûte"
+            if choix in self.INSTRUMENTS:
+                return self.INSTRUMENTS[choix](self.player)
             elif choix in ("q", "quit", "exit"):
                 return None
             else:
@@ -76,7 +74,6 @@ class Menu:
         while True:
             self.afficher_menu_modes()
             choix = normaliser(input("Entrez le numéro ou le nom du mode : "))
-
             if choix in self.MODES:
                 return self.MODES[choix]
             elif choix in ("q", "quit", "exit"):
@@ -88,37 +85,67 @@ class Menu:
         self.instrument = self.choisir_instrument()
         if not self.instrument:
             print("Fin du programme.")
-        print(f"\n🎶 Vous avez choisi l’instrument : {self.instrument}")
+            return
+
+        print(f"\n🎶 Vous avez choisi l’instrument : {self.instrument.nom}")
         self.mode = self.choisir_mode()
+
         if not self.mode:
             print("Fin du programme.")
-        print(f"\n🎶 Vous avez choisi le mode : {self.mode}\n")
-        match self.mode:
-            case "aléatoire":
-                # Mode aléatoire
-                return
-            case "fichier":
-                menu_fichier(["pirate", "mario"])
-            case _:
-                # Mode clavier
-                return
+            return
+
+        if self.mode == "clavier":
+            mode_clavier(self.instrument)
+        elif self.mode == "aléatoire":
+            mode_aleatoire(self.instrument)
+        elif self.mode == "fichier":
+            menu_fichier(self.instrument)
+
+        print(f"👉 Mode sélectionné : {self.mode}")
 
 
-def menu_fichier(file_list):
-    for i, file in enumerate(file_list, start=1):
-        print(f"{i}. {file}")
+# === Modes de jeu ===
+def mode_clavier(instrument):
+    print("🎹 Mode clavier : tapez une lettre de a à z (q pour quitter)")
+    alphabet = [chr(i) for i in range(ord("a"), ord("z") + 1)]
+    notes = list(note_to_frequency.keys())
+    mapping = {lettre: notes[i % len(notes)]
+               for i, lettre in enumerate(alphabet)}
+
     while True:
-        choix = input("Taper le chiffre du fichier que vous souhaiter jouer: ")
-        mp = MusicPlayer()
-        match choix:
-            case "1":
-                mp.play_from_file("pirate.txt")
-                return None
-            case "2":
-                mp.play_from_file("mario.txt")
-                return None
-            case _:
-                print("Le chiffre choisi n'est pas valide")
+        touche = normaliser(input("Lettre : "))
+        if touche == "q":
+            break
+        elif touche in mapping:
+            note = mapping[touche]
+            print(f"🎵 Lettre '{touche}' → note {note}")
+            instrument.jouer(note, 0.5)
+        else:
+            print("❌ Entrée invalide (a–z seulement).")
+
+
+def mode_aleatoire(instrument):
+    notes = random.sample(list(note_to_frequency.keys()), 5)
+    print(f"🎲 Notes générées aléatoirement : {notes}")
+    for note in notes:
+        instrument.jouer(note, 0.5)
+
+
+def menu_fichier(instrument):
+    fichiers = ["notes_au_clavier", "mario"]
+    for i, f in enumerate(fichiers, 1):
+        print(f"{i}) {f}")
+    while True:
+        choix = input("Votre choix : ")
+        if choix == "1":
+            mode_clavier(instrument)
+            break
+        elif choix == "2":
+            mp = MusicPlayer()
+            mp.play_from_file("mario.txt")
+            break
+        else:
+            print("❌ Choix invalide.")
 
 
 if __name__ == "__main__":
