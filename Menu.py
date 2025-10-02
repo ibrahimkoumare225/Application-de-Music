@@ -5,8 +5,10 @@ CLI orientée objet : Choix d'un instrument + mode de jeu
 """
 from MusicPlayer_base_original import MusicPlayer
 
+
 def normaliser(texte: str) -> str:
-        return texte.strip().lower()
+    return texte.strip().lower()
+
 
 class Menu:
     INSTRUMENTS = {
@@ -51,7 +53,8 @@ class Menu:
     def choisir_instrument(self):
         while True:
             self.afficher_menu_instruments()
-            choix = normaliser(input("Entrez le numéro ou le nom de l'instrument : "))
+            choix = normaliser(
+                input("Entrez le numéro ou le nom de l'instrument : "))
 
             if choix in ("1", "flute", "flûte"):
                 return "flûte"
@@ -78,18 +81,23 @@ class Menu:
 
     def lancer(self):
         self.instrument = self.choisir_instrument()
-        if self.instrument:
-            print(f"\n🎶 Vous avez choisi l’instrument : {self.instrument}")
-            self.mode = self.choisir_mode()
-            if "fichier" in self.mode:
-                menu_fichier(["pirate", "mario"])
-
-            if self.mode:
-                print(f"👉 Mode sélectionné : {self.mode}")
-            else:
-                print("Fin du programme.")
-        else:
+        if not self.instrument:
             print("Fin du programme.")
+        print(f"\n🎶 Vous avez choisi l’instrument : {self.instrument}")
+        self.mode = self.choisir_mode()
+        if not self.mode:
+            print("Fin du programme.")
+        print(f"\n🎶 Vous avez choisi le mode : {self.mode}\n")
+        match self.mode:
+            case "aléatoire":
+                # Mode aléatoire
+                return
+            case "fichier":
+                menu_fichier(["pirate", "mario"])
+            case _:
+                # Mode clavier
+                return
+
 
 def menu_fichier(file_list):
     for i, file in enumerate(file_list, start=1):
@@ -97,16 +105,17 @@ def menu_fichier(file_list):
     while True:
         choix = input("Taper le chiffre du fichier que vous souhaiter jouer: ")
         mp = MusicPlayer()
-        match choix: 
+        match choix:
             case "1":
                 mp.play_from_file("pirate.txt")
                 return None
             case "2":
                 mp.play_from_file("mario.txt")
                 return None
-            case _: 
+            case _:
                 print("Le chiffre choisi n'est pas valide")
-    
+
+
 if __name__ == "__main__":
     jeu = Menu()
     jeu.lancer()
