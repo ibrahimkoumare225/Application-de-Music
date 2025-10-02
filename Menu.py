@@ -16,13 +16,15 @@ class Menu:
         "flûte": "flûte",
         "guitare": "guitare",
         "batterie": "batterie",
+        "piano": "piano",
         "drums": "batterie",
         "drum": "batterie"
     }
 
     MODES = {
-        "1": "aléatoire",
-        "2": "clavier",
+        
+        "1": "clavier",
+        "2": "aléatoire",
         "3": "fichier",
         "aleatoire": "aléatoire",
         "aléatoire": "aléatoire",
@@ -36,16 +38,17 @@ class Menu:
 
     def afficher_menu_instruments(self):
         print("=== Choix de l'instrument ===")
-        print("1) Flûte")
+        print("1) Piano")
         print("2) Guitare")
         print("3) Batterie")
+        print("4) Flûte")
         print("q) Quitter")
         print()
 
     def afficher_menu_modes(self):
         print("\n=== Choix du mode de jeu ===")
-        print("1) Aléatoire")
-        print("2) Notes au clavier")
+        print("1) Notes au clavier")
+        print("2) Aléatoire")
         print("3) À partir d’un fichier")
         print("q) Quitter")
         print()
@@ -56,12 +59,14 @@ class Menu:
             choix = normaliser(
                 input("Entrez le numéro ou le nom de l'instrument : "))
 
-            if choix in ("1", "flute", "flûte"):
-                return "flûte"
+            if choix in ("1", "piano"):
+                return "piano"
             elif choix in ("2", "guitare"):
                 return "guitare"
             elif choix in ("3", "batterie", "drum", "drums"):
                 return "batterie"
+            elif choix in ("4", "flute", "flûte"):
+                return "flûte"
             elif choix in ("q", "quit", "exit"):
                 return None
             else:
