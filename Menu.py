@@ -132,7 +132,7 @@ def mode_aleatoire(instrument):
 
 
 def menu_fichier(instrument):
-    fichiers = ["notes_au_clavier", "mario"]
+    fichiers = ["pirate.txt", "mario.txt"]
     for i, f in enumerate(fichiers, 1):
         print(f"{i}) {f}")
     while True:
