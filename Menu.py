@@ -19,7 +19,7 @@ def normaliser(texte: str) -> str:
     return texte.strip().lower()
 
 
-# --- Classe Piano avec son intégré ---
+# --- Classe Piano avec interface Pygame ---
 class Piano:
     def __init__(self, player: MusicPlayer):
         self.nom = "Piano"
@@ -31,6 +31,28 @@ class Piano:
         self.NOTE_DURATION = 1.0
 
         pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
+        pygame.init()
+
+        # Mapping clavier -> notes
+        self.KEY_NOTE_MAP = {
+            pygame.K_a: "C4",
+            pygame.K_s: "D4",
+            pygame.K_d: "E4",
+            pygame.K_f: "F4",
+            pygame.K_g: "G4",
+            pygame.K_h: "A4",
+            pygame.K_j: "B4",
+            pygame.K_k: "C5",
+        }
+
+        # Préparer les sons
+        self.note_sounds = {}
+        for key, note in self.KEY_NOTE_MAP.items():
+            freq = note_to_frequency[note]
+            wave = self.make_wave(freq, duration=self.NOTE_DURATION)
+            arr = self.to_stereo(wave)
+            sound = pygame.sndarray.make_sound(arr)
+            self.note_sounds[key] = sound
 
     def make_wave(self, freq, duration=None):
         if duration is None:
@@ -55,15 +77,45 @@ class Piano:
         return wav
 
     def jouer(self, note: str, duration: float = None):
-        if note not in note_to_frequency:
+        # Jouer via le mapping clavier interne si note correspond
+        key = None
+        for k, n in self.KEY_NOTE_MAP.items():
+            if n == note:
+                key = k
+                break
+        if key and key in self.note_sounds:
+            self.note_sounds[key].play()
+            pygame.time.delay(int((duration or self.NOTE_DURATION) * 1000))
+        else:
             print(f"❌ Note inconnue : {note}")
-            return
-        freq = note_to_frequency[note]
-        wave = self.make_wave(freq, duration)
-        arr = self.to_stereo(wave)
-        sound = pygame.sndarray.make_sound(arr)
-        sound.play()
-        pygame.time.delay(int((duration or self.NOTE_DURATION) * 1000))
+
+    def interface_piano(self):
+        """Lancer l'interface graphique Pygame du piano"""
+        window = pygame.display.set_mode((600, 200))
+        pygame.display.set_caption("Clavier Piano")
+        font = pygame.font.SysFont(None, 24)
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key in self.note_sounds:
+                        self.note_sounds[event.key].play()
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
+            window.fill((0, 0, 0))
+            y = 50
+            for k, note in self.KEY_NOTE_MAP.items():
+                txt = f"Touche {pygame.key.name(k)} -> {note}"
+                img = font.render(txt, True, (255, 255, 255))
+                window.blit(img, (20, y))
+                y += 30
+            pygame.display.flip()
+
+        pygame.quit()
 
 
 # --- Menu principal ---
@@ -108,7 +160,7 @@ class Menu:
     def afficher_menu_modes(self):
         print("\n=== Choix du mode de jeu ===")
         print("1) À partir d’un fichier")
-        print("2) Notes au clavier (a–z)")
+        print("2) Notes au clavier (a–z / interface piano)")
         print("3) Aléatoire")
         print("q) Quitter\n")
 
@@ -147,7 +199,10 @@ class Menu:
             print("Fin du programme.")
             return
 
-        if self.mode == "clavier":
+        # Si c'est le piano et mode clavier, lancer l'interface Pygame
+        if self.mode == "clavier" and isinstance(self.instrument, Piano):
+            self.instrument.interface_piano()
+        elif self.mode == "clavier":
             mode_clavier(self.instrument)
         elif self.mode == "aléatoire":
             mode_aleatoire(self.instrument)
@@ -157,57 +212,23 @@ class Menu:
         print(f"👉 Mode sélectionné : {self.mode}")
 
 
-# === Modes de jeu ===
-# === Modes de jeu ===
+# === Modes génériques pour autres instruments ===
 def mode_clavier(instrument):
-    if isinstance(instrument, Piano):
-        # Mapping spécifique au piano
-        KEY_NOTE_MAP = {
-            "a": "C4",
-            "s": "D4",
-            "d": "E4",
-            "f": "F4",
-            "g": "G4",
-            "h": "A4",
-            "j": "B4",
-            "k": "C5",
-        }
+    print("🎼 Mode clavier (a–z)")
+    alphabet = [chr(i) for i in range(ord("a"), ord("z") + 1)]
+    notes = list(note_to_frequency.keys())
+    mapping = {lettre: notes[i % len(notes)] for i, lettre in enumerate(alphabet)}
 
-        print("🎹 Mode clavier Piano :")
-        for key, note in KEY_NOTE_MAP.items():
-            print(f"   Touche '{key}' → {note}")
-        print("Tapez q pour quitter.\n")
-
-        while True:
-            touche = normaliser(input("Lettre : "))
-            if touche == "q":
-                break
-            elif touche in KEY_NOTE_MAP:
-                note = KEY_NOTE_MAP[touche]
-                print(f"🎵 {touche} → {note}")
-                instrument.jouer(note, 0.8)
-            else:
-                print("❌ Touche invalide. Utilisez seulement : " +
-                      ", ".join(KEY_NOTE_MAP.keys()))
-
-    else:
-        # Mode générique pour les autres instruments
-        print("🎼 Mode clavier (a–z)")
-        alphabet = [chr(i) for i in range(ord("a"), ord("z") + 1)]
-        notes = list(note_to_frequency.keys())
-        mapping = {lettre: notes[i % len(notes)] for i, lettre in enumerate(alphabet)}
-
-        while True:
-            touche = normaliser(input("Lettre : "))
-            if touche == "q":
-                break
-            elif touche in mapping:
-                note = mapping[touche]
-                print(f"🎵 Lettre '{touche}' → note {note}")
-                instrument.jouer(note, 0.5)
-            else:
-                print("❌ Entrée invalide (a–z seulement).")
-
+    while True:
+        touche = normaliser(input("Lettre : "))
+        if touche == "q":
+            break
+        elif touche in mapping:
+            note = mapping[touche]
+            print(f"🎵 Lettre '{touche}' → note {note}")
+            instrument.jouer(note, 0.5)
+        else:
+            print("❌ Entrée invalide (a–z seulement).")
 
 
 def mode_aleatoire(instrument):
