@@ -33,6 +33,18 @@ class Piano:
         pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
         pygame.init()
 
+# Mapping clavier -> sons de batterie
+        self.KEY_MAP = {
+            pygame.K_a: "kick",
+            pygame.K_s: "snare",
+            pygame.K_d: "hihat",
+            pygame.K_f: "crash",
+            pygame.K_g: "tom1",
+            pygame.K_h: "tom2",
+            pygame.K_j: "tom3",
+            pygame.K_k: "ride",
+        }
+
         # Mapping clavier -> notes (14 blanches + 13 noires)
         self.KEY_NOTE_MAP = {
             pygame.K_a: "C4",
@@ -170,6 +182,80 @@ class Piano:
 
         pygame.quit()
 
+
+
+
+def interface_drum(self):
+    """Interface Pygame - Batterie avec pads"""
+    window_width = 800
+    window_height = 500
+    window = pygame.display.set_mode((window_width, window_height))
+    pygame.display.set_caption("Clavier Batterie")
+    font = pygame.font.SysFont(None, 32)
+
+    running = True
+
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GRAY = (70, 70, 70)
+    BLUE = (50, 150, 255)
+    RED = (255, 80, 80)
+
+    # Associer des touches du clavier aux instruments de batterie
+    drum_mapping = {
+        pygame.K_a: ("Kick", self.drum_sounds.get("kick")),          # grosse caisse
+        pygame.K_s: ("Snare", self.drum_sounds.get("snare")),        # caisse claire
+        pygame.K_d: ("Hi-Hat", self.drum_sounds.get("hihat")),       # charleston
+        pygame.K_f: ("Crash", self.drum_sounds.get("crash")),        # cymbale crash
+        pygame.K_g: ("Tom1", self.drum_sounds.get("tom1")),          # tom aigu
+        pygame.K_h: ("Tom2", self.drum_sounds.get("tom2")),          # tom médium
+        pygame.K_j: ("Tom3", self.drum_sounds.get("tom3")),          # tom grave
+        pygame.K_k: ("Ride", self.drum_sounds.get("ride")),          # cymbale ride
+    }
+
+    # Organisation des pads
+    pad_size = 150
+    pad_margin = 30
+    pads = {}
+    i = 0
+    for key, (name, sound) in drum_mapping.items():
+        row = i // 4
+        col = i % 4
+        x = col * (pad_size + pad_margin) + pad_margin
+        y = row * (pad_size + pad_margin) + pad_margin
+        pads[key] = {"rect": pygame.Rect(x, y, pad_size, pad_size), "name": name, "sound": sound}
+        i += 1
+
+    pressed_keys = set()
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key in pads and pads[event.key]["sound"]:
+                    pads[event.key]["sound"].play()
+                    pressed_keys.add(event.key)
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+            elif event.type == pygame.KEYUP:
+                if event.key in pressed_keys:
+                    pressed_keys.remove(event.key)
+
+        window.fill((30, 30, 30))  # fond sombre
+
+        # Dessiner les pads
+        for key, pad in pads.items():
+            color = RED if key in pressed_keys else BLUE
+            pygame.draw.rect(window, color, pad["rect"], border_radius=20)
+            pygame.draw.rect(window, WHITE, pad["rect"], 3, border_radius=20)
+            txt = font.render(pad["name"], True, WHITE)
+            txt_rect = txt.get_rect(center=pad["rect"].center)
+            window.blit(txt, txt_rect)
+
+        pygame.display.flip()
+
+    pygame.quit()
 
 
 # --- Menu principal ---
