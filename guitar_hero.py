@@ -28,13 +28,14 @@ def play_guitar_hero(iterations):
     mp = MusicPlayer()
     notes = choose_notes()
     keys = ["A", "Z", "E", "R", "T"]
-    keys_and_notes = [(note, key) for note, key in zip(notes, keys)]
+    keys_and_notes = [(note, key) for note, key in zip(
+        notes, random.sample(keys, len(notes)))]
     for i in range(iterations):
         duration = duration_generator()
         start_time = time.time()
-        pressed_key = input()
         print(
             f"Appuyez sur {keys_and_notes[i][1]} pour jouer {keys_and_notes[i][0]} pendant {duration} secondes.")
+        pressed_key = input()
         if has_note_been_pressed(keys_and_notes[i][1], pressed_key) and not has_time_elapsed(start_time, duration):
             print("Correct!")
             mp.play(note_to_frequency[keys_and_notes[i][0]])
