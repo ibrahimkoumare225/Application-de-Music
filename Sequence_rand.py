@@ -1,7 +1,6 @@
 import numpy as np
 import pygame
 import random
-import sys
 
 from note_frequence_base import note_to_frequency
 from guitar_hero import play_guitar_hero
@@ -80,8 +79,9 @@ def main():
                 f"Lecture : {note}, Fréquence : {freq} Hz, Durée : {dur:.2f} s")
             mp.play(freq, dur)
 
-    pygame.quit()
-    sys.exit(0)
+    print("✅ Séquence aléatoire terminée.")
+    # ❌ Ne pas quitter pygame ni appeler sys.exit() ici
+    # pygame.quit()   <-- à éviter si tu veux rejouer plus tard
 
 
 if __name__ == "__main__":
