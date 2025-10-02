@@ -36,26 +36,31 @@ class Piano:
         # Mapping clavier -> notes (14 blanches + 13 noires)
         self.KEY_NOTE_MAP = {
             pygame.K_a: "C4",
-            pygame.K_w: "C#4",
-            pygame.K_s: "D4",
-            pygame.K_e: "D#4",
-            pygame.K_d: "E4",
-            pygame.K_f: "F4",
-            pygame.K_t: "F#4",
+            pygame.K_1: "C#4",
+            pygame.K_z: "D4",
+            pygame.K_2: "D#4",
+            pygame.K_e: "E4",
+            pygame.K_r: "F4",
+            pygame.K_3: "F#4",
+            pygame.K_t: "G4",
+            pygame.K_4: "G#4",
+            pygame.K_y: "A4",
+            pygame.K_5: "A#4",
+            pygame.K_u: "B4",
+            pygame.K_i: "C5",
+            pygame.K_6: "C#5",
+            pygame.K_o: "D5",
+            pygame.K_7: "D#5",
+            pygame.K_p: "E5",
+            pygame.K_f: "F5",
+            pygame.K_8: "F#5",
+            pygame.K_9: "G5",
+            pygame.K_SEMICOLON: "G#5",
             pygame.K_g: "G4",
-            pygame.K_y: "G#4",
             pygame.K_h: "A4",
-            pygame.K_u: "A#4",
             pygame.K_j: "B4",
-            pygame.K_k: "C5",
-            pygame.K_o: "C#5",
-            pygame.K_l: "D5",
-            pygame.K_p: "D#5",
-            pygame.K_SEMICOLON: "E5",
-            pygame.K_QUOTE: "F5",
-            pygame.K_1: "F#5",
-            pygame.K_2: "G5",
-            pygame.K_3: "G#5",
+
+
         }
 
         # Préparer les sons
@@ -102,12 +107,12 @@ class Piano:
     def interface_piano(self):
         """Interface Pygame 14 blanches + 10 noires"""
         white_keys_list = [
-            pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_j,
-            pygame.K_k, pygame.K_l, pygame.K_SEMICOLON, pygame.K_QUOTE, pygame.K_z, pygame.K_x, pygame.K_c
+            pygame.K_a, pygame.K_z, pygame.K_e, pygame.K_r, pygame.K_t, pygame.K_y, pygame.K_u,
+            pygame.K_i, pygame.K_o, pygame.K_p, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_j
         ]
         black_keys_list = [
-            pygame.K_w, pygame.K_e, pygame.K_t, pygame.K_y, pygame.K_u, pygame.K_o, pygame.K_p,
-            pygame.K_1, pygame.K_2, pygame.K_3
+            pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
+            pygame.K_8, pygame.K_9, pygame.K_SEMICOLON
         ]
 
         window_width = 14 * 60
