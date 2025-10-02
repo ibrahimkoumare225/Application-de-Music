@@ -20,7 +20,6 @@ def normaliser(texte: str) -> str:
     return texte.strip().lower()
 
 
-# --- Classe Piano avec interface Pygame ---
 class Piano:
     def __init__(self, player: MusicPlayer):
         self.nom = "Piano"
@@ -34,16 +33,29 @@ class Piano:
         pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
         pygame.init()
 
-        # Mapping clavier -> notes
+        # Mapping clavier -> notes (14 blanches + 13 noires)
         self.KEY_NOTE_MAP = {
             pygame.K_a: "C4",
+            pygame.K_w: "C#4",
             pygame.K_s: "D4",
+            pygame.K_e: "D#4",
             pygame.K_d: "E4",
             pygame.K_f: "F4",
+            pygame.K_t: "F#4",
             pygame.K_g: "G4",
+            pygame.K_y: "G#4",
             pygame.K_h: "A4",
+            pygame.K_u: "A#4",
             pygame.K_j: "B4",
             pygame.K_k: "C5",
+            pygame.K_o: "C#5",
+            pygame.K_l: "D5",
+            pygame.K_p: "D#5",
+            pygame.K_SEMICOLON: "E5",
+            pygame.K_QUOTE: "F5",
+            pygame.K_1: "F#5",
+            pygame.K_2: "G5",
+            pygame.K_3: "G#5",
         }
 
         # Préparer les sons
@@ -60,8 +72,6 @@ class Piano:
             duration = self.NOTE_DURATION
         t = np.linspace(0, duration, int(self.SAMPLE_RATE * duration), False)
         wave = np.sin(2 * np.pi * freq * t)
-
-        # Enveloppe ADSR simplifiée
         attack = int(0.02 * self.SAMPLE_RATE)
         envelope = np.ones_like(wave)
         envelope[:attack] = np.linspace(0, 1, attack)
@@ -90,11 +100,38 @@ class Piano:
             print(f"❌ Note inconnue : {note}")
 
     def interface_piano(self):
-        """Lancer l'interface graphique Pygame du piano"""
-        window = pygame.display.set_mode((600, 200))
+        """Interface Pygame 14 blanches + 10 noires"""
+        white_keys_list = [
+            pygame.K_a, pygame.K_s, pygame.K_d, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_j,
+            pygame.K_k, pygame.K_l, pygame.K_SEMICOLON, pygame.K_QUOTE, pygame.K_z, pygame.K_x, pygame.K_c
+        ]
+        black_keys_list = [
+            pygame.K_w, pygame.K_e, pygame.K_t, pygame.K_y, pygame.K_u, pygame.K_o, pygame.K_p,
+            pygame.K_1, pygame.K_2, pygame.K_3
+        ]
+
+        window_width = 14 * 60
+        window_height = 300
+        window = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption("Clavier Piano")
         font = pygame.font.SysFont(None, 24)
         running = True
+
+        WHITE = (255, 255, 255)
+        BLACK = (0, 0, 0)
+        GRAY = (50, 50, 50)
+        RED = (255, 0, 0)
+        blue_pressed = (50, 150, 255)
+
+        white_key_width = 60
+        white_key_height = 250
+        black_key_width = 35
+        black_key_height = 150
+
+        pressed_keys = set()
+
+        # Position relative des touches noires par rapport aux blanches
+        black_positions = [0, 1, 3, 4, 5, 7, 8, 10, 11, 12, 14, 15, 16]
 
         while running:
             for event in pygame.event.get():
@@ -103,19 +140,36 @@ class Piano:
                 elif event.type == pygame.KEYDOWN:
                     if event.key in self.note_sounds:
                         self.note_sounds[event.key].play()
+                        pressed_keys.add(event.key)
                     if event.key == pygame.K_ESCAPE:
                         running = False
+                elif event.type == pygame.KEYUP:
+                    if event.key in pressed_keys:
+                        pressed_keys.remove(event.key)
 
-            window.fill((0, 0, 0))
-            y = 50
-            for k, note in self.KEY_NOTE_MAP.items():
-                txt = f"Touche {pygame.key.name(k)} -> {note}"
-                img = font.render(txt, True, (255, 255, 255))
-                window.blit(img, (20, y))
-                y += 30
+            window.fill((30, 30, 30))  # fond sombre
+
+            # Dessiner touches blanches
+            for i, key in enumerate(white_keys_list):
+                color = RED if key in pressed_keys else WHITE
+                pygame.draw.rect(window, color, (i * white_key_width, 0, white_key_width, white_key_height))
+                pygame.draw.rect(window, BLACK, (i * white_key_width, 0, white_key_width, white_key_height), 2)
+                txt = font.render(pygame.key.name(key), True, BLACK)
+                window.blit(txt, (i * white_key_width + 10, white_key_height - 30))
+
+            # Dessiner touches noires
+            for i, key in enumerate(black_keys_list):
+                x = black_positions[i] * white_key_width + white_key_width - black_key_width // 2
+                color = blue_pressed if key in pressed_keys else BLACK
+                pygame.draw.rect(window, color, (x, 0, black_key_width, black_key_height))
+                pygame.draw.rect(window, GRAY, (x, 0, black_key_width, black_key_height), 2)
+                txt = font.render(pygame.key.name(key), True, WHITE)
+                window.blit(txt, (x + 5, 30))
+
             pygame.display.flip()
 
         pygame.quit()
+
 
 
 # --- Menu principal ---

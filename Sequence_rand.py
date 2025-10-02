@@ -3,6 +3,7 @@ import pygame
 import random
 
 from note_frequence_base import note_to_frequency
+from guitar_hero import play_guitar_hero
 
 
 class MusicPlayer:
@@ -12,7 +13,8 @@ class MusicPlayer:
         self.sample_rate = sample_rate
 
     def _make_tone(self, frequency, duration=0.5):
-        t = np.linspace(0, duration, int(self.sample_rate * duration), endpoint=False)
+        t = np.linspace(0, duration, int(
+            self.sample_rate * duration), endpoint=False)
         wave = np.sin(2 * np.pi * frequency * t)
 
         # Petit envelope pour éviter les clics
@@ -42,7 +44,8 @@ def generate_random_sequence(length=20):
     for _ in range(length):
         note = random.choice(notes)
         freq = note_to_frequency[note]
-        duration = random.uniform(0.5, 3.0)  # durée aléatoire entre 0.5 et 3 secondes
+        # durée aléatoire entre 0.5 et 3 secondes
+        duration = random.uniform(0.5, 3.0)
         sequence.append((note, freq, duration))
     return sequence
 
@@ -67,10 +70,14 @@ def main():
     length = ask_sequence_length()
 
     # Générer et jouer la séquence
-    seq = generate_random_sequence(length=length)
-    for note, freq, dur in seq:
-        print(f"Lecture : {note}, Fréquence : {freq} Hz, Durée : {dur:.2f} s")
-        mp.play(freq, dur)
+    if length >= 100:
+        play_guitar_hero(length)
+    else:
+        seq = generate_random_sequence(length=length)
+        for note, freq, dur in seq:
+            print(
+                f"Lecture : {note}, Fréquence : {freq} Hz, Durée : {dur:.2f} s")
+            mp.play(freq, dur)
 
     print("✅ Séquence aléatoire terminée.")
     # ❌ Ne pas quitter pygame ni appeler sys.exit() ici
