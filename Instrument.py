@@ -1,5 +1,5 @@
 import numpy as np
-from MusicPlayer_Base import MusicPlayer
+from MusicPlayer_base_original import MusicPlayer
 from note_frequence_base import note_to_frequency
 
 # Classe abstraite Instrument

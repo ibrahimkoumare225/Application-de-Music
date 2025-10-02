@@ -110,3 +110,30 @@ def menu_fichier(file_list):
 if __name__ == "__main__":
     jeu = Menu()
     jeu.lancer()
+
+def mode_aleatoire(instrument):
+    notes = random.sample(list(note_to_frequency.keys()), 5)
+    print(f"🎲 Notes générées aléatoirement : {notes}")
+    for note in notes:
+        instrument.jouer(note, 0.5)
+
+if __name__ == "__main__":
+    instrument_nom = choisir_instrument()
+    if instrument_nom:
+        mp = MusicPlayer()
+        instrument_class = INSTRUMENTS[instrument_nom]
+        instrument = instrument_class(mp)
+
+        print(f"\n🎶 Vous avez choisi l’instrument : {instrument.nom}")
+        mode = choisir_mode()
+        if mode == "aléatoire":
+            mode_aleatoire(instrument)
+        elif mode == "clavier":
+            mode_clavier(instrument)
+        elif mode == "fichier":
+            mode_fichier(instrument)
+        else:
+            print("Fin du programme.")
+    else:
+        print("Fin du programme.")
+
