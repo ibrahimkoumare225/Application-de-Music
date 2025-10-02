@@ -38,7 +38,8 @@ def play_guitar_hero(iterations):
         pressed_key = input()
         if has_note_been_pressed(keys_and_notes[i][1], pressed_key) and not has_time_elapsed(start_time, duration):
             print("Correct!")
-            mp.play(note_to_frequency[keys_and_notes[i][0]])
+            mp.play(note_to_frequency[keys_and_notes[i]
+                    [0]], duration)
             correct += 1
         else:
             print("Raté !")
