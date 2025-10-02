@@ -78,7 +78,6 @@ class Piano:
         return wav
 
     def jouer(self, note: str, duration: float = None):
-        # Jouer via le mapping clavier interne si note correspond
         key = None
         for k, n in self.KEY_NOTE_MAP.items():
             if n == note:
@@ -136,9 +135,9 @@ class Menu:
     }
 
     MODES = {
-        "3": "fichier",
-        "1": "clavier",
-        "2": "aléatoire",
+        "1": "fichier",
+        "2": "clavier",
+        "3": "aléatoire",
         "fichier": "fichier",
         "clavier": "clavier",
         "aleatoire": "aléatoire",
@@ -160,9 +159,9 @@ class Menu:
 
     def afficher_menu_modes(self):
         print("\n=== Choix du mode de jeu ===")
-        print("1) Notes au clavier (a–z / interface piano)")
-        print("2) Aléatoire")
-        print("3) À partir d’un fichier")
+        print("1) À partir d’un fichier")
+        print("2) Notes au clavier (a–z / interface piano)")
+        print("3) Aléatoire")
         print("q) Quitter\n")
 
     def choisir_instrument(self):
@@ -194,23 +193,35 @@ class Menu:
             return
 
         print(f"\n🎶 Vous avez choisi l’instrument : {self.instrument.nom}")
-        self.mode = self.choisir_mode()
 
-        if not self.mode:
-            print("Fin du programme.")
-            return
+        while True:
+            self.mode = self.choisir_mode()
+            if not self.mode:
+                print("Fin du programme.")
+                return
 
-        # Si c'est le piano et mode clavier, lancer l'interface Pygame
-        if self.mode == "clavier" and isinstance(self.instrument, Piano):
-            self.instrument.interface_piano()
-        elif self.mode == "clavier":
-            mode_clavier(self.instrument)
-        elif self.mode == "aléatoire":
-            mode_aleatoire(self.instrument)
-        elif self.mode == "fichier":
-            menu_fichier(self.instrument)
+            rejouer_mode = True
+            while rejouer_mode:
+                if self.mode == "clavier" and isinstance(self.instrument, Piano):
+                    self.instrument.interface_piano()
+                elif self.mode == "clavier":
+                    mode_clavier(self.instrument)
+                elif self.mode == "aléatoire":
+                    mode_aleatoire(self.instrument)
+                elif self.mode == "fichier":
+                    menu_fichier(self.instrument)
 
-        print(f"👉 Mode sélectionné : {self.mode}")
+                print(f"\n👉 Mode terminé : {self.mode}")
+                choix = input("Voulez-vous [r] rejouer ce mode, [p] retour menu principal, [m] menu des modes, [q] quitter ? ").strip().lower()
+                if choix == "r":
+                    continue
+                elif choix == "p":
+                    return  # retour au menu principal
+                elif choix == "m":
+                    break  # retour au menu des modes
+                elif choix == "q":
+                    print("✅ Merci d'avoir joué, à bientôt !")
+                    exit(0)
 
 
 # === Modes génériques pour autres instruments ===
@@ -221,7 +232,7 @@ def mode_clavier(instrument):
     mapping = {lettre: notes[i % len(notes)] for i, lettre in enumerate(alphabet)}
 
     while True:
-        touche = normaliser(input("Lettre : "))
+        touche = normaliser(input("Lettre (q pour quitter le mode) : "))
         if touche == "q":
             break
         elif touche in mapping:
@@ -234,7 +245,8 @@ def mode_clavier(instrument):
 
 def mode_aleatoire(instrument):
     print("🎲 Mode aléatoire : lancement de la séquence aléatoire")
-    main_sequence_rand()  # Utilise le code de Sequence_rand.py
+    main_sequence_rand()
+    print("✅ Séquence aléatoire terminée.")
 
 
 def menu_fichier(instrument):
@@ -242,7 +254,7 @@ def menu_fichier(instrument):
     for i, f in enumerate(fichiers, 1):
         print(f"{i}) {f}")
     while True:
-        choix = input("Votre choix : ")
+        choix = input("Votre choix (q pour quitter le mode) : ")
         if choix == "1":
             mp = MusicPlayer()
             mp.play_from_file("pirate.txt")
@@ -251,10 +263,13 @@ def menu_fichier(instrument):
             mp = MusicPlayer()
             mp.play_from_file("mario.txt")
             break
+        elif choix == "q":
+            break
         else:
             print("❌ Choix invalide.")
 
 
 if __name__ == "__main__":
-    jeu = Menu()
-    jeu.lancer()
+    while True:
+        jeu = Menu()
+        jeu.lancer()
