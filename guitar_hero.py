@@ -5,7 +5,7 @@ from MusicPlayer_base_original import MusicPlayer
 
 
 def duration_generator():
-    return random.choice([0.5, 1, 1.5, 2])
+    return random.choice([2, 2.5, 3, 3.5, 4])
 
 
 def choose_notes():
@@ -18,7 +18,7 @@ def has_note_been_pressed(key_to_press, pressed_key):
 
 
 def has_time_elapsed(start_time, duration):
-    return (time.time() - start_time) <= (time.time() + duration)
+    return (time.time() + duration) <= (start_time + duration)
 
 
 def play_guitar_hero(iterations):
