@@ -29,7 +29,7 @@ def play_guitar_hero(iterations):
     notes = choose_notes()
     keys = ["A", "Z", "E", "R", "T"]
     keys_and_notes = [(note, key) for note, key in zip(
-        notes, random.sample(keys, len(notes)))]
+        random.choices(notes, k=iterations), random.choices(keys, k=iterations))]
     for i in range(iterations):
         duration = duration_generator()
         start_time = time.time()
