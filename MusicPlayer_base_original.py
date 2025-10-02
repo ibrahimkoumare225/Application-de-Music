@@ -38,7 +38,7 @@ class MusicPlayer:
         sound = pygame.sndarray.make_sound(contiguous_tone)
         sound.set_volume(0.05)  # Réglez le volume
         sound.play()
-        pygame.time.delay(int(duration * 500)) 
+        pygame.time.delay(int(duration * 1000)) 
 
     def play_from_file(self, filename):
         with open(filename, "r") as f:

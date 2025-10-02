@@ -7,6 +7,7 @@ import random
 import pygame
 import numpy as np
 from note_frequence_base import note_to_frequency
+from Sequence_rand import main as main_sequence_rand
 
 # --- Classe MusicPlayer de base ---
 from MusicPlayer_base_original import MusicPlayer
@@ -135,9 +136,9 @@ class Menu:
     }
 
     MODES = {
-        "1": "fichier",
-        "2": "clavier",
-        "3": "aléatoire",
+        "3": "fichier",
+        "1": "clavier",
+        "2": "aléatoire",
         "fichier": "fichier",
         "clavier": "clavier",
         "aleatoire": "aléatoire",
@@ -159,9 +160,9 @@ class Menu:
 
     def afficher_menu_modes(self):
         print("\n=== Choix du mode de jeu ===")
-        print("1) À partir d’un fichier")
-        print("2) Notes au clavier (a–z / interface piano)")
-        print("3) Aléatoire")
+        print("1) Notes au clavier (a–z / interface piano)")
+        print("2) Aléatoire")
+        print("3) À partir d’un fichier")
         print("q) Quitter\n")
 
     def choisir_instrument(self):
@@ -232,10 +233,8 @@ def mode_clavier(instrument):
 
 
 def mode_aleatoire(instrument):
-    notes = random.sample(list(note_to_frequency.keys()), 5)
-    print(f"🎲 Notes générées aléatoirement : {notes}")
-    for note in notes:
-        instrument.jouer(note, 0.5)
+    print("🎲 Mode aléatoire : lancement de la séquence aléatoire")
+    main_sequence_rand()  # Utilise le code de Sequence_rand.py
 
 
 def menu_fichier(instrument):
@@ -245,7 +244,8 @@ def menu_fichier(instrument):
     while True:
         choix = input("Votre choix : ")
         if choix == "1":
-            mode_clavier(instrument)
+            mp = MusicPlayer()
+            mp.play_from_file("pirate.txt")
             break
         elif choix == "2":
             mp = MusicPlayer()
