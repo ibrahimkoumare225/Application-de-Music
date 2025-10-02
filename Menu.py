@@ -20,6 +20,134 @@ def normaliser(texte: str) -> str:
     return texte.strip().lower()
 
 
+class Guitare:
+    def __init__(self, player: MusicPlayer):
+        self.nom = "Guitare"
+        self.player = player
+        self.SAMPLE_RATE = 44100
+        self.BITS = -16
+        self.CHANNELS = 2
+        self.MAX_VOLUME = 0.6
+        self.NOTE_DURATION = 1.5   # guitare = sustain plus long
+
+        pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
+        pygame.init()
+
+        # Mapping clavier -> notes guitare (comme piano mais timbre guitare)
+        self.KEY_NOTE_MAP = {
+            pygame.K_a: "E3",   # corde 6
+            pygame.K_z: "A3",   # corde 5
+            pygame.K_e: "D4",   # corde 4
+            pygame.K_r: "G4",   # corde 3
+            pygame.K_t: "B4",   # corde 2
+            pygame.K_y: "E5",   # corde 1
+        }
+
+        # Préparer sons
+        self.note_sounds = {}
+        for key, note in self.KEY_NOTE_MAP.items():
+            freq = note_to_frequency[note]
+            wave = self.make_guitar_wave(freq, duration=self.NOTE_DURATION)
+            arr = self.to_stereo(wave)
+            sound = pygame.sndarray.make_sound(arr)
+            self.note_sounds[key] = sound
+
+    def make_guitar_wave(self, freq, duration=None):
+        """Génère une onde type guitare plus réaliste"""
+        if duration is None:
+            duration = self.NOTE_DURATION
+        t = np.linspace(0, duration, int(self.SAMPLE_RATE * duration), False)
+
+        # fondamentale + plusieurs harmoniques décroissantes
+        wave = (
+            0.7 * np.sin(2 * np.pi * freq * t) +        # fondamentale
+            0.3 * np.sin(2 * np.pi * 2 * freq * t) +    # octave
+            0.2 * np.sin(2 * np.pi * 3 * freq * t) +    # quinte + octave
+            0.15 * np.sin(2 * np.pi * 4 * freq * t) +   # harmonique plus haute
+            0.1 * np.sin(2 * np.pi * 5 * freq * t)
+        )
+
+        # léger vibrato (modulation en fréquence)
+        vibrato = 0.002 * np.sin(2 * np.pi * 5 * t)  # 5 Hz
+        wave *= np.sin(2 * np.pi * freq * (t + vibrato))
+
+        # ajouter un peu de bruit blanc (effet de corde)
+        noise = 0.02 * np.random.randn(len(t))
+        wave += noise
+
+        # enveloppe guitare (attaque très rapide, sustain, release naturel)
+        attack = int(0.005 * self.SAMPLE_RATE)   # 5 ms
+        decay = int(0.1 * self.SAMPLE_RATE)      # 100 ms
+        release = int(0.5 * self.SAMPLE_RATE)    # relâchement
+        sustain_level = 0.6
+
+        envelope = np.ones_like(wave)
+        # attaque (0 → 1)
+        envelope[:attack] = np.linspace(0, 1, attack)
+        # decay (1 → sustain_level)
+        envelope[attack:attack+decay] = np.linspace(1, sustain_level, decay)
+        # sustain
+        envelope[attack+decay:-release] = sustain_level
+        # release (sustain_level → 0)
+        envelope[-release:] = np.linspace(sustain_level, 0, release)
+
+        return (wave * envelope).astype(np.float32)
+
+
+    def to_stereo(self, wave, volume=None):
+        if volume is None:
+            volume = self.MAX_VOLUME
+        wav = wave * (32767 * volume)
+        wav = np.clip(wav, -32768, 32767).astype(np.int16)
+        if self.CHANNELS == 2:
+            wav = np.column_stack((wav, wav))
+        return wav
+
+    def jouer(self, note: str, duration: float = None):
+        key = None
+        for k, n in self.KEY_NOTE_MAP.items():
+            if n == note:
+                key = k
+                break
+        if key and key in self.note_sounds:
+            self.note_sounds[key].play()
+            pygame.time.delay(int((duration or self.NOTE_DURATION) * 1000))
+        else:
+            print(f"❌ Note inconnue : {note}")
+
+    def interface_guitare(self):
+        """Interface clavier guitare (6 cordes affichées)"""
+        window = pygame.display.set_mode((600, 200))
+        pygame.display.set_caption("Clavier Guitare")
+        font = pygame.font.SysFont(None, 28)
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key in self.note_sounds:
+                        self.note_sounds[event.key].play()
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+
+            window.fill((20, 20, 20))
+            y = 40
+            for k, note in self.KEY_NOTE_MAP.items():
+                txt = f"Touche {pygame.key.name(k)} -> {note}"
+                img = font.render(txt, True, (255, 255, 100))
+                window.blit(img, (20, y))
+                y += 25
+
+            pygame.display.flip()
+
+        pygame.quit()
+
+
+
+
+
 class Piano:
     def __init__(self, player: MusicPlayer):
         self.nom = "Piano"
@@ -32,18 +160,6 @@ class Piano:
 
         pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
         pygame.init()
-
-# Mapping clavier -> sons de batterie
-        self.KEY_MAP = {
-            pygame.K_a: "kick",
-            pygame.K_s: "snare",
-            pygame.K_d: "hihat",
-            pygame.K_f: "crash",
-            pygame.K_g: "tom1",
-            pygame.K_h: "tom2",
-            pygame.K_j: "tom3",
-            pygame.K_k: "ride",
-        }
 
         # Mapping clavier -> notes (14 blanches + 13 noires)
         self.KEY_NOTE_MAP = {
@@ -349,6 +465,8 @@ class Menu:
             while rejouer_mode:
                 if self.mode == "clavier" and isinstance(self.instrument, Piano):
                     self.instrument.interface_piano()
+                elif self.mode == "clavier" and isinstance(self.instrument, Guitare):
+                    self.instrument.interface_guitare()
                 elif self.mode == "clavier":
                     mode_clavier(self.instrument)
                 elif self.mode == "aléatoire":
@@ -367,6 +485,7 @@ class Menu:
                 elif choix == "q":
                     print("✅ Merci d'avoir joué, à bientôt !")
                     exit(0)
+
 
 
 # === Modes génériques pour autres instruments ===
