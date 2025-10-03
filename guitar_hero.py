@@ -39,14 +39,48 @@ def play_guitar_hero():
         ready, _, _ = select.select([sys.stdin], [], [], 1)
         if ready:
             pressed_key = sys.stdin.readline().strip()
+            if has_note_been_pressed(keys_and_notes[i][1], pressed_key):
+                print("Correct!")
+                correct += 1
+                continue
+            else:
+                print("Raté !")
+                errors += 1
         else:
             pressed_key = ""
             print("Raté !")
             errors += 1
-        if has_note_been_pressed(keys_and_notes[i][1], pressed_key):
-            print("Correct!")
-            correct += 1
-            continue
+        
 
     print("Bien joué", name, "Vous avez eu", correct,
           "corrects et", errors, "erreurs.")
+    filename = "guitar_hero_scores.txt"
+    with open(filename, "a") as file:
+        try:
+            with open(filename, "r") as read_file:
+                lines = read_file.readlines()
+                updated_lines = []
+                user_found = False
+
+                for line in lines:
+                    if name in line:
+                        last_correct = int(line.split(
+                            ": ")[1].split(" corrects")[0])
+                        if correct > last_correct:
+                            updated_lines.append(
+                                f"{name}: {correct} corrects, {errors} erreurs\n")
+                            user_found = True
+                        else:
+                            updated_lines.append(line)
+                            return
+                    else:
+                        print(line)
+                        updated_lines.append(line)
+
+                if user_found:
+                    with open(filename, "w") as write_file:
+                        write_file.writelines(updated_lines)
+                    return
+        except FileNotFoundError:
+            pass
+        file.write(f"{name}: {correct} corrects, {errors} erreurs\n")
