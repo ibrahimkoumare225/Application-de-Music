@@ -39,14 +39,18 @@ def play_guitar_hero():
         ready, _, _ = select.select([sys.stdin], [], [], 1)
         if ready:
             pressed_key = sys.stdin.readline().strip()
+            if has_note_been_pressed(keys_and_notes[i][1], pressed_key):
+                print("Correct!")
+                correct += 1
+                continue
+            else:
+                print("Raté !")
+                errors += 1
         else:
             pressed_key = ""
             print("Raté !")
             errors += 1
-        if has_note_been_pressed(keys_and_notes[i][1], pressed_key):
-            print("Correct!")
-            correct += 1
-            continue
+        
 
     print("Bien joué", name, "Vous avez eu", correct,
           "corrects et", errors, "erreurs.")
@@ -70,6 +74,7 @@ def play_guitar_hero():
                             updated_lines.append(line)
                             return
                     else:
+                        print(line)
                         updated_lines.append(line)
 
                 if user_found:
