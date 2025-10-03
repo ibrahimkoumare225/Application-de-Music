@@ -43,7 +43,7 @@ def generate_random_sequence(length=20, mode="mixte"):
     sequence = []
 
     # Définir la durée selon le mode choisi
-    if mode == "lent":
+    if mode == "court":
         fixed_duration = 0.5
     elif mode == "moyen":
         fixed_duration = 1.5
@@ -81,7 +81,7 @@ def ask_sequence_length():
 def ask_duration_mode():
     """Demande à l'utilisateur le mode de durée des notes."""
     modes = {
-        "1": ("lent", "0.5 s"),
+        "1": ("court", "0.5 s"),
         "2": ("moyen", "1.5 s"),
         "3": ("long", "3.0 s"),
         "4": ("mixte", "durées aléatoires (0.5–3.0 s)")
@@ -109,7 +109,7 @@ def main():
 
     # Générer et jouer la séquence
     if length >= 100:
-        play_guitar_hero()
+        play_guitar_hero(mode)
     else:
         seq = generate_random_sequence(length=length, mode=mode)
         for i, (note, freq, dur) in enumerate(seq, start=1):

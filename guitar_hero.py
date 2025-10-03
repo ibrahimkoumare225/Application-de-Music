@@ -17,19 +17,32 @@ def has_time_elapsed(start_time, duration):
     return (time.time() + duration) <= (start_time + duration)
 
 
-def play_guitar_hero():
+def get_duration(mode):
+    match mode:
+        case "court":
+            return 0.5
+        case "moyen":
+            return 1.5
+        case "long":
+            return 3.0
+        case "mixte":
+            return random.uniform(0.5, 3.0)
+
+
+def play_guitar_hero(mode):
     print("Bienvenue dans le jeu Guitar Hero !")
+    keys = ["A", "Z", "E", "R", "T"]
     correct = 0
     errors = 0
     mp = MusicPlayer()
     notes = choose_notes()
     time_in_seconds = input("Combien de secondes voulez-vous jouer ? ")
     time_in_seconds = int(time_in_seconds)
-    keys = ["A", "Z", "E", "R", "T"]
+    nb_notes = time_in_seconds / get_duration(mode)
     keys_and_notes = [(note, key) for note, key in zip(
-        random.choices(notes, k=time_in_seconds), random.choices(keys, k=time_in_seconds))]
-    for i in range(time_in_seconds):
-        duration = 1
+        random.choices(notes, k=nb_notes), random.choices(keys, k=nb_notes))]
+    for i in range(nb_notes):
+        duration = get_duration(mode)
         print(
             f"{keys_and_notes[i][1]} pour jouer {keys_and_notes[i][0]}")
         mp.play(note_to_frequency[keys_and_notes[i]
