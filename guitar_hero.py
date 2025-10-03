@@ -55,13 +55,27 @@ def play_guitar_hero():
         try:
             with open(filename, "r") as read_file:
                 lines = read_file.readlines()
-                if lines:
-                    last_line = lines[-1].strip()
-                    if name in last_line:
-                        last_correct = int(last_line.split(
+                updated_lines = []
+                user_found = False
+
+                for line in lines:
+                    if name in line:
+                        last_correct = int(line.split(
                             ": ")[1].split(" corrects")[0])
-                        if correct <= last_correct:
+                        if correct > last_correct:
+                            updated_lines.append(
+                                f"{name}: {correct} corrects, {errors} erreurs\n")
+                            user_found = True
+                        else:
+                            updated_lines.append(line)
                             return
+                    else:
+                        updated_lines.append(line)
+
+                if user_found:
+                    with open(filename, "w") as write_file:
+                        write_file.writelines(updated_lines)
+                    return
         except FileNotFoundError:
             pass
         file.write(f"{name}: {correct} corrects, {errors} erreurs\n")
