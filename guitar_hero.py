@@ -25,6 +25,7 @@ def play_guitar_hero():
     errors = 0
     mp = MusicPlayer()
     notes = choose_notes()
+    name = input("Entrez votre nom : ")
     time_in_seconds = input("Combien de secondes voulez-vous jouer ? ")
     time_in_seconds = int(time_in_seconds)
     keys = ["A", "Z", "E", "R", "T"]
@@ -47,5 +48,5 @@ def play_guitar_hero():
             correct += 1
             continue
 
-    print("Jeu terminé ! Vous avez eu", correct,
+    print("Bien joué", name, "Vous avez eu", correct,
           "corrects et", errors, "erreurs.")
