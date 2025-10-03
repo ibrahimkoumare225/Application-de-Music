@@ -415,7 +415,6 @@ class Menu:
         print("1) Piano")
         print("2) Guitare")
         print("3) Batterie")
-        print("4) Flûte")
         print("q) Quitter\n")
 
     def afficher_menu_modes(self):
