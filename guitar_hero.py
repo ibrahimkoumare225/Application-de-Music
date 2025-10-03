@@ -50,3 +50,18 @@ def play_guitar_hero():
 
     print("Bien joué", name, "Vous avez eu", correct,
           "corrects et", errors, "erreurs.")
+    filename = "guitar_hero_scores.txt"
+    with open(filename, "a") as file:
+        try:
+            with open(filename, "r") as read_file:
+                lines = read_file.readlines()
+                if lines:
+                    last_line = lines[-1].strip()
+                    if name in last_line:
+                        last_correct = int(last_line.split(
+                            ": ")[1].split(" corrects")[0])
+                        if correct <= last_correct:
+                            return
+        except FileNotFoundError:
+            pass
+        file.write(f"{name}: {correct} corrects, {errors} erreurs\n")
