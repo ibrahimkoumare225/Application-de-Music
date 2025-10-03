@@ -155,11 +155,15 @@ class Piano:
         self.MAX_VOLUME = 0.5
         self.NOTE_DURATION = 1.0
 
+        # Fichier pour enregistrer les notes
+        self.record_file = "touches_piano.txt"
+        self.recorded_notes = []
+
         pygame.mixer.init(frequency=self.SAMPLE_RATE,
                           size=self.BITS, channels=self.CHANNELS)
         pygame.init()
 
-        # Mapping clavier -> notes (14 blanches + 13 noires)
+        # Mapping clavier -> notes
         self.KEY_NOTE_MAP = {
             pygame.K_a: "C4",
             pygame.K_1: "C#4",
@@ -185,8 +189,6 @@ class Piano:
             pygame.K_g: "G4",
             pygame.K_h: "A4",
             pygame.K_j: "B4",
-
-
         }
 
         # Préparer les sons
@@ -203,10 +205,13 @@ class Piano:
             duration = self.NOTE_DURATION
         t = np.linspace(0, duration, int(self.SAMPLE_RATE * duration), False)
         wave = np.sin(2 * np.pi * freq * t)
+
+        # Enveloppe ADSR simplifiée
         attack = int(0.02 * self.SAMPLE_RATE)
         envelope = np.ones_like(wave)
         envelope[:attack] = np.linspace(0, 1, attack)
         envelope[attack:] = np.exp(-3 * (t[attack:] / duration))
+
         return (wave * envelope).astype(np.float32)
 
     def to_stereo(self, wave, volume=None):
@@ -219,6 +224,7 @@ class Piano:
         return wav
 
     def jouer(self, note: str, duration: float = None):
+        """Jouer une note directement par son nom"""
         key = None
         for k, n in self.KEY_NOTE_MAP.items():
             if n == note:
@@ -226,25 +232,26 @@ class Piano:
                 break
         if key and key in self.note_sounds:
             self.note_sounds[key].play()
-            pygame.time.delay(int((duration or self.NOTE_DURATION) * 1000))
+            # Enregistrer la note jouée
+            self.recorded_notes.append(f"{note} {duration or self.NOTE_DURATION:.3f}")
         else:
             print(f"❌ Note inconnue : {note}")
 
     def interface_piano(self):
-        """Interface Pygame 14 blanches + 10 noires"""
+        """Interface graphique du piano"""
         white_keys_list = [
             pygame.K_a, pygame.K_z, pygame.K_e, pygame.K_r, pygame.K_t, pygame.K_y, pygame.K_u,
             pygame.K_i, pygame.K_o, pygame.K_p, pygame.K_f, pygame.K_g, pygame.K_h, pygame.K_j
         ]
         black_keys_list = [
-            pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7,
-            pygame.K_8, pygame.K_9, pygame.K_SEMICOLON
+            pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5,
+            pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9, pygame.K_SEMICOLON
         ]
 
         window_width = 14 * 60
         window_height = 300
         window = pygame.display.set_mode((window_width, window_height))
-        pygame.display.set_caption("Clavier Piano")
+        pygame.display.set_caption("🎹 Clavier Piano")
         font = pygame.font.SysFont(None, 24)
         running = True
 
@@ -252,7 +259,7 @@ class Piano:
         BLACK = (0, 0, 0)
         GRAY = (50, 50, 50)
         RED = (255, 0, 0)
-        blue_pressed = (50, 150, 255)
+        BLUE_PRESSED = (50, 150, 255)
 
         white_key_width = 60
         white_key_height = 250
@@ -260,9 +267,7 @@ class Piano:
         black_key_height = 150
 
         pressed_keys = set()
-
-        # Position relative des touches noires par rapport aux blanches
-        black_positions = [0, 1, 3, 4, 5, 7, 8, 10, 11, 12, 14, 15, 16]
+        black_positions = [0, 1, 3, 4, 5, 7, 8, 10, 11, 12]
 
         while running:
             for event in pygame.event.get():
@@ -272,6 +277,9 @@ class Piano:
                     if event.key in self.note_sounds:
                         self.note_sounds[event.key].play()
                         pressed_keys.add(event.key)
+                        # Enregistrement à chaque appui
+                        note = self.KEY_NOTE_MAP[event.key]
+                        self.recorded_notes.append(f"{note} {self.NOTE_DURATION:.3f}")
                     if event.key == pygame.K_ESCAPE:
                         running = False
                 elif event.type == pygame.KEYUP:
@@ -283,110 +291,32 @@ class Piano:
             # Dessiner touches blanches
             for i, key in enumerate(white_keys_list):
                 color = RED if key in pressed_keys else WHITE
-                pygame.draw.rect(
-                    window, color, (i * white_key_width, 0, white_key_width, white_key_height))
-                pygame.draw.rect(
-                    window, BLACK, (i * white_key_width, 0, white_key_width, white_key_height), 2)
+                pygame.draw.rect(window, color,
+                                 (i * white_key_width, 0, white_key_width, white_key_height))
+                pygame.draw.rect(window, BLACK,
+                                 (i * white_key_width, 0, white_key_width, white_key_height), 2)
                 txt = font.render(pygame.key.name(key), True, BLACK)
-                window.blit(txt, (i * white_key_width +
-                            10, white_key_height - 30))
+                window.blit(txt, (i * white_key_width + 10, white_key_height - 30))
 
             # Dessiner touches noires
             for i, key in enumerate(black_keys_list):
-                x = black_positions[i] * white_key_width + \
-                    white_key_width - black_key_width // 2
-                color = blue_pressed if key in pressed_keys else BLACK
-                pygame.draw.rect(
-                    window, color, (x, 0, black_key_width, black_key_height))
-                pygame.draw.rect(
-                    window, GRAY, (x, 0, black_key_width, black_key_height), 2)
-                txt = font.render(pygame.key.name(key), True, WHITE)
-                window.blit(txt, (x + 5, 30))
+                if i < len(black_positions):
+                    x = black_positions[i] * white_key_width + white_key_width - black_key_width // 2
+                    color = BLUE_PRESSED if key in pressed_keys else BLACK
+                    pygame.draw.rect(window, color, (x, 0, black_key_width, black_key_height))
+                    pygame.draw.rect(window, GRAY, (x, 0, black_key_width, black_key_height), 2)
+                    txt = font.render(pygame.key.name(key), True, WHITE)
+                    window.blit(txt, (x + 5, 30))
 
             pygame.display.flip()
 
+        # Sauvegarde des notes dans le fichier à la fermeture
+        with open(self.record_file, "w", encoding="utf-8") as f:
+            for line in self.recorded_notes:
+                f.write(line + "\n")
+
+        print(f"💾 Enregistrement sauvegardé dans {self.record_file}")
         pygame.quit()
-
-
-def interface_drum(self):
-    """Interface Pygame - Batterie avec pads"""
-    window_width = 800
-    window_height = 500
-    window = pygame.display.set_mode((window_width, window_height))
-    pygame.display.set_caption("Clavier Batterie")
-    font = pygame.font.SysFont(None, 32)
-
-    running = True
-
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    GRAY = (70, 70, 70)
-    BLUE = (50, 150, 255)
-    RED = (255, 80, 80)
-
-    # Associer des touches du clavier aux instruments de batterie
-    drum_mapping = {
-        # grosse caisse
-        pygame.K_a: ("Kick", self.drum_sounds.get("kick")),
-        # caisse claire
-        pygame.K_s: ("Snare", self.drum_sounds.get("snare")),
-        # charleston
-        pygame.K_d: ("Hi-Hat", self.drum_sounds.get("hihat")),
-        # cymbale crash
-        pygame.K_f: ("Crash", self.drum_sounds.get("crash")),
-        pygame.K_g: ("Tom1", self.drum_sounds.get("tom1")),          # tom aigu
-        # tom médium
-        pygame.K_h: ("Tom2", self.drum_sounds.get("tom2")),
-        # tom grave
-        pygame.K_j: ("Tom3", self.drum_sounds.get("tom3")),
-        # cymbale ride
-        pygame.K_k: ("Ride", self.drum_sounds.get("ride")),
-    }
-
-    # Organisation des pads
-    pad_size = 150
-    pad_margin = 30
-    pads = {}
-    i = 0
-    for key, (name, sound) in drum_mapping.items():
-        row = i // 4
-        col = i % 4
-        x = col * (pad_size + pad_margin) + pad_margin
-        y = row * (pad_size + pad_margin) + pad_margin
-        pads[key] = {"rect": pygame.Rect(
-            x, y, pad_size, pad_size), "name": name, "sound": sound}
-        i += 1
-
-    pressed_keys = set()
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key in pads and pads[event.key]["sound"]:
-                    pads[event.key]["sound"].play()
-                    pressed_keys.add(event.key)
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-            elif event.type == pygame.KEYUP:
-                if event.key in pressed_keys:
-                    pressed_keys.remove(event.key)
-
-        window.fill((30, 30, 30))  # fond sombre
-
-        # Dessiner les pads
-        for key, pad in pads.items():
-            color = RED if key in pressed_keys else BLUE
-            pygame.draw.rect(window, color, pad["rect"], border_radius=20)
-            pygame.draw.rect(window, WHITE, pad["rect"], 3, border_radius=20)
-            txt = font.render(pad["name"], True, WHITE)
-            txt_rect = txt.get_rect(center=pad["rect"].center)
-            window.blit(txt, txt_rect)
-
-        pygame.display.flip()
-
-    pygame.quit()
 
 
 # --- Menu principal ---
@@ -436,6 +366,8 @@ class Menu:
         if self.enable_guitar_hero:
             print("4) Guitar Hero")
         print("q) Quitter\n")
+        print(self.enable_guitar_hero)
+        print(self.MODES)
 
     def choisir_instrument(self):
         while True:
@@ -554,6 +486,6 @@ def menu_fichier(instrument):
 
 
 if __name__ == "__main__":
-    jeu = Menu()
     while True:
+        jeu = Menu()
         jeu.lancer()
