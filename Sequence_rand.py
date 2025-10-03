@@ -98,6 +98,13 @@ def ask_duration_mode():
         print("❌ Choix invalide, veuillez entrer 1, 2, 3 ou 4.")
 
 
+def launch_sequence(length, mode, mp):
+    seq = generate_random_sequence(length=length, mode=mode)
+    for i, (note, freq, dur) in enumerate(seq, start=1):
+        print(f"[{i}/{length}] Lecture : {note}, {freq} Hz, Durée : {dur:.2f} s")
+        mp.play(freq, dur)
+
+
 def main():
     enable_guitar_hero = False
     mp = MusicPlayer()
@@ -116,11 +123,9 @@ def main():
             print("\n🎸 Mode Guitar Hero activé !")
             print("Retrouver le mode dans le menu principal !\n")
             is_first_time = False
+        launch_sequence(length, mode, mp)
     else:
-        seq = generate_random_sequence(length=length, mode=mode)
-        for i, (note, freq, dur) in enumerate(seq, start=1):
-            print(f"[{i}/{length}] Lecture : {note}, {freq} Hz, Durée : {dur:.2f} s")
-            mp.play(freq, dur)
+        launch_sequence(length, mode, mp)
 
     print("\n✅ Séquence aléatoire terminée.")
     return enable_guitar_hero
