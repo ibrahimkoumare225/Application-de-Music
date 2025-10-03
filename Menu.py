@@ -556,6 +556,6 @@ def menu_fichier(instrument):
 
 
 if __name__ == "__main__":
+    jeu = Menu()
     while True:
-        jeu = Menu()
         jeu.lancer()
