@@ -107,7 +107,7 @@ def launch_sequence(length, mode, mp):
 
 def main():
     mp = MusicPlayer()
-
+    enable_guitar_hero = False
     # Demander le nombre de notes
     length = ask_sequence_length()
 
