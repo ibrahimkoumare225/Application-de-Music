@@ -233,7 +233,8 @@ class Piano:
         if key and key in self.note_sounds:
             self.note_sounds[key].play()
             # Enregistrer la note jouée
-            self.recorded_notes.append(f"{note} {duration or self.NOTE_DURATION:.3f}")
+            self.recorded_notes.append(
+                f"{note} {duration or self.NOTE_DURATION:.3f}")
         else:
             print(f"❌ Note inconnue : {note}")
 
@@ -279,7 +280,8 @@ class Piano:
                         pressed_keys.add(event.key)
                         # Enregistrement à chaque appui
                         note = self.KEY_NOTE_MAP[event.key]
-                        self.recorded_notes.append(f"{note} {self.NOTE_DURATION:.3f}")
+                        self.recorded_notes.append(
+                            f"{note} {self.NOTE_DURATION:.3f}")
                     if event.key == pygame.K_ESCAPE:
                         running = False
                 elif event.type == pygame.KEYUP:
@@ -296,15 +298,19 @@ class Piano:
                 pygame.draw.rect(window, BLACK,
                                  (i * white_key_width, 0, white_key_width, white_key_height), 2)
                 txt = font.render(pygame.key.name(key), True, BLACK)
-                window.blit(txt, (i * white_key_width + 10, white_key_height - 30))
+                window.blit(txt, (i * white_key_width +
+                            10, white_key_height - 30))
 
             # Dessiner touches noires
             for i, key in enumerate(black_keys_list):
                 if i < len(black_positions):
-                    x = black_positions[i] * white_key_width + white_key_width - black_key_width // 2
+                    x = black_positions[i] * white_key_width + \
+                        white_key_width - black_key_width // 2
                     color = BLUE_PRESSED if key in pressed_keys else BLACK
-                    pygame.draw.rect(window, color, (x, 0, black_key_width, black_key_height))
-                    pygame.draw.rect(window, GRAY, (x, 0, black_key_width, black_key_height), 2)
+                    pygame.draw.rect(
+                        window, color, (x, 0, black_key_width, black_key_height))
+                    pygame.draw.rect(
+                        window, GRAY, (x, 0, black_key_width, black_key_height), 2)
                     txt = font.render(pygame.key.name(key), True, WHITE)
                     window.blit(txt, (x + 5, 30))
 
@@ -366,8 +372,6 @@ class Menu:
         if self.enable_guitar_hero:
             print("4) Guitar Hero")
         print("q) Quitter\n")
-        print(self.enable_guitar_hero)
-        print(self.MODES)
 
     def choisir_instrument(self):
         while True:
