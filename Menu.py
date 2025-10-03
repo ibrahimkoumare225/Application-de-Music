@@ -30,7 +30,8 @@ class Guitare:
         self.MAX_VOLUME = 0.6
         self.NOTE_DURATION = 1.5   # guitare = sustain plus long
 
-        pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
+        pygame.mixer.init(frequency=self.SAMPLE_RATE,
+                          size=self.BITS, channels=self.CHANNELS)
         pygame.init()
 
         # Mapping clavier -> notes guitare (comme piano mais timbre guitare)
@@ -93,7 +94,6 @@ class Guitare:
 
         return (wave * envelope).astype(np.float32)
 
-
     def to_stereo(self, wave, volume=None):
         if volume is None:
             volume = self.MAX_VOLUME
@@ -145,9 +145,6 @@ class Guitare:
         pygame.quit()
 
 
-
-
-
 class Piano:
     def __init__(self, player: MusicPlayer):
         self.nom = "Piano"
@@ -158,7 +155,8 @@ class Piano:
         self.MAX_VOLUME = 0.5
         self.NOTE_DURATION = 1.0
 
-        pygame.mixer.init(frequency=self.SAMPLE_RATE, size=self.BITS, channels=self.CHANNELS)
+        pygame.mixer.init(frequency=self.SAMPLE_RATE,
+                          size=self.BITS, channels=self.CHANNELS)
         pygame.init()
 
         # Mapping clavier -> notes (14 blanches + 13 noires)
@@ -285,25 +283,29 @@ class Piano:
             # Dessiner touches blanches
             for i, key in enumerate(white_keys_list):
                 color = RED if key in pressed_keys else WHITE
-                pygame.draw.rect(window, color, (i * white_key_width, 0, white_key_width, white_key_height))
-                pygame.draw.rect(window, BLACK, (i * white_key_width, 0, white_key_width, white_key_height), 2)
+                pygame.draw.rect(
+                    window, color, (i * white_key_width, 0, white_key_width, white_key_height))
+                pygame.draw.rect(
+                    window, BLACK, (i * white_key_width, 0, white_key_width, white_key_height), 2)
                 txt = font.render(pygame.key.name(key), True, BLACK)
-                window.blit(txt, (i * white_key_width + 10, white_key_height - 30))
+                window.blit(txt, (i * white_key_width +
+                            10, white_key_height - 30))
 
             # Dessiner touches noires
             for i, key in enumerate(black_keys_list):
-                x = black_positions[i] * white_key_width + white_key_width - black_key_width // 2
+                x = black_positions[i] * white_key_width + \
+                    white_key_width - black_key_width // 2
                 color = blue_pressed if key in pressed_keys else BLACK
-                pygame.draw.rect(window, color, (x, 0, black_key_width, black_key_height))
-                pygame.draw.rect(window, GRAY, (x, 0, black_key_width, black_key_height), 2)
+                pygame.draw.rect(
+                    window, color, (x, 0, black_key_width, black_key_height))
+                pygame.draw.rect(
+                    window, GRAY, (x, 0, black_key_width, black_key_height), 2)
                 txt = font.render(pygame.key.name(key), True, WHITE)
                 window.blit(txt, (x + 5, 30))
 
             pygame.display.flip()
 
         pygame.quit()
-
-
 
 
 def interface_drum(self):
@@ -324,14 +326,21 @@ def interface_drum(self):
 
     # Associer des touches du clavier aux instruments de batterie
     drum_mapping = {
-        pygame.K_a: ("Kick", self.drum_sounds.get("kick")),          # grosse caisse
-        pygame.K_s: ("Snare", self.drum_sounds.get("snare")),        # caisse claire
-        pygame.K_d: ("Hi-Hat", self.drum_sounds.get("hihat")),       # charleston
-        pygame.K_f: ("Crash", self.drum_sounds.get("crash")),        # cymbale crash
+        # grosse caisse
+        pygame.K_a: ("Kick", self.drum_sounds.get("kick")),
+        # caisse claire
+        pygame.K_s: ("Snare", self.drum_sounds.get("snare")),
+        # charleston
+        pygame.K_d: ("Hi-Hat", self.drum_sounds.get("hihat")),
+        # cymbale crash
+        pygame.K_f: ("Crash", self.drum_sounds.get("crash")),
         pygame.K_g: ("Tom1", self.drum_sounds.get("tom1")),          # tom aigu
-        pygame.K_h: ("Tom2", self.drum_sounds.get("tom2")),          # tom médium
-        pygame.K_j: ("Tom3", self.drum_sounds.get("tom3")),          # tom grave
-        pygame.K_k: ("Ride", self.drum_sounds.get("ride")),          # cymbale ride
+        # tom médium
+        pygame.K_h: ("Tom2", self.drum_sounds.get("tom2")),
+        # tom grave
+        pygame.K_j: ("Tom3", self.drum_sounds.get("tom3")),
+        # cymbale ride
+        pygame.K_k: ("Ride", self.drum_sounds.get("ride")),
     }
 
     # Organisation des pads
@@ -344,7 +353,8 @@ def interface_drum(self):
         col = i % 4
         x = col * (pad_size + pad_margin) + pad_margin
         y = row * (pad_size + pad_margin) + pad_margin
-        pads[key] = {"rect": pygame.Rect(x, y, pad_size, pad_size), "name": name, "sound": sound}
+        pads[key] = {"rect": pygame.Rect(
+            x, y, pad_size, pad_size), "name": name, "sound": sound}
         i += 1
 
     pressed_keys = set()
@@ -409,6 +419,7 @@ class Menu:
         self.instrument = None
         self.mode = None
         self.player = MusicPlayer()
+        self.enable_guitar_hero = False
 
     def afficher_menu_instruments(self):
         print("=== Choix de l'instrument ===")
@@ -422,12 +433,15 @@ class Menu:
         print("1) Notes au clavier (a–z / interface piano)")
         print("2) À partir d’un fichier")
         print("3) Aléatoire")
+        if self.enable_guitar_hero:
+            print("4) Guitar Hero")
         print("q) Quitter\n")
 
     def choisir_instrument(self):
         while True:
             self.afficher_menu_instruments()
-            choix = normaliser(input("Entrez le numéro ou le nom de l'instrument : "))
+            choix = normaliser(
+                input("Entrez le numéro ou le nom de l'instrument : "))
             if choix in self.INSTRUMENTS:
                 return self.INSTRUMENTS[choix](self.player)
             elif choix in ("q", "quit", "exit"):
@@ -469,12 +483,18 @@ class Menu:
                 elif self.mode == "clavier":
                     mode_clavier(self.instrument)
                 elif self.mode == "aléatoire":
-                    mode_aleatoire(self.instrument)
+                    self.enable_guitar_hero = mode_aleatoire(self.instrument)
+                    if self.enable_guitar_hero and not "4" in self.MODES:
+                        self.MODES["4"] = "guitar hero"
                 elif self.mode == "fichier":
                     menu_fichier(self.instrument)
+                elif self.mode == "guitar hero" and self.enable_guitar_hero:
+                    from guitar_hero import play_guitar_hero
+                    play_guitar_hero()
 
                 print(f"\n👉 Mode terminé : {self.mode}")
-                choix = input("Voulez-vous [r] rejouer ce mode, [p] retour menu principal, [m] menu des modes, [q] quitter ? ").strip().lower()
+                choix = input(
+                    "Voulez-vous [r] rejouer ce mode, [p] retour menu principal, [m] menu des modes, [q] quitter ? ").strip().lower()
                 if choix == "r":
                     continue
                 elif choix == "p":
@@ -486,13 +506,13 @@ class Menu:
                     exit(0)
 
 
-
 # === Modes génériques pour autres instruments ===
 def mode_clavier(instrument):
     print("🎼 Mode clavier (a–z)")
     alphabet = [chr(i) for i in range(ord("a"), ord("z") + 1)]
     notes = list(note_to_frequency.keys())
-    mapping = {lettre: notes[i % len(notes)] for i, lettre in enumerate(alphabet)}
+    mapping = {lettre: notes[i % len(notes)]
+               for i, lettre in enumerate(alphabet)}
 
     while True:
         touche = normaliser(input("Lettre (q pour quitter le mode) : "))
@@ -508,8 +528,9 @@ def mode_clavier(instrument):
 
 def mode_aleatoire(instrument):
     print("🎲 Mode aléatoire : lancement de la séquence aléatoire")
-    main_sequence_rand()
+    enable_guitar_hero = main_sequence_rand()
     print("✅ Séquence aléatoire terminée.")
+    return enable_guitar_hero
 
 
 def menu_fichier(instrument):

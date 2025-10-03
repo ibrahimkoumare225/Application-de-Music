@@ -99,6 +99,7 @@ def ask_duration_mode():
 
 
 def main():
+    enable_guitar_hero = False
     mp = MusicPlayer()
 
     # Demander le nombre de notes
@@ -109,7 +110,12 @@ def main():
 
     # Générer et jouer la séquence
     if length >= 100:
-        play_guitar_hero(mode)
+        enable_guitar_hero = True
+        is_first_time = True
+        if enable_guitar_hero and is_first_time:
+            print("\n🎸 Mode Guitar Hero activé !")
+            print("Retrouver le mode dans le menu principal !\n")
+            is_first_time = False
     else:
         seq = generate_random_sequence(length=length, mode=mode)
         for i, (note, freq, dur) in enumerate(seq, start=1):
@@ -117,6 +123,7 @@ def main():
             mp.play(freq, dur)
 
     print("\n✅ Séquence aléatoire terminée.")
+    return enable_guitar_hero
 
 
 if __name__ == "__main__":
