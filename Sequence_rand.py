@@ -106,7 +106,6 @@ def launch_sequence(length, mode, mp):
 
 
 def main():
-    enable_guitar_hero = False
     mp = MusicPlayer()
 
     # Demander le nombre de notes
@@ -116,14 +115,14 @@ def main():
     mode = ask_duration_mode()
 
     # Générer et jouer la séquence
-    if length >= 100:
+    if length >= 20:
         enable_guitar_hero = True
         is_first_time = True
         if enable_guitar_hero and is_first_time:
-            print("\n🎸 Mode Guitar Hero activé !")
-            print("Retrouver le mode dans le menu principal !\n")
             is_first_time = False
         launch_sequence(length, mode, mp)
+        print("\n🎸 Mode Guitar Hero activé !")
+        print("Retrouver le mode dans le menu principal !\n")
     else:
         launch_sequence(length, mode, mp)
 

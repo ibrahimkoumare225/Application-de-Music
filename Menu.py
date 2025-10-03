@@ -436,6 +436,8 @@ class Menu:
         if self.enable_guitar_hero:
             print("4) Guitar Hero")
         print("q) Quitter\n")
+        print(self.enable_guitar_hero)
+        print(self.MODES)
 
     def choisir_instrument(self):
         while True:
