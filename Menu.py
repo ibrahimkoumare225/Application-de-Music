@@ -167,50 +167,71 @@ class Piano:
     def interface_piano(self):
         pygame.display.quit()
         pygame.display.init()
-        white_keys_list=[pygame.K_a,pygame.K_z,pygame.K_e,pygame.K_r,pygame.K_t,pygame.K_y,pygame.K_u,pygame.K_i,pygame.K_o,pygame.K_p,pygame.K_f,pygame.K_g,pygame.K_h,pygame.K_j]
-        black_keys_list=[pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_SEMICOLON]
+        white_keys_list = [pygame.K_a,pygame.K_z,pygame.K_e,pygame.K_r,pygame.K_t,pygame.K_y,
+                        pygame.K_u,pygame.K_i,pygame.K_o,pygame.K_p,pygame.K_f,pygame.K_g,
+                        pygame.K_h,pygame.K_j]
+        black_keys_list = [pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,
+                        pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9,pygame.K_SEMICOLON]
 
         window = pygame.display.set_mode((14*60,300))
         pygame.display.set_caption("🎹 Clavier Piano")
         font = pygame.font.SysFont(None,24)
-        running=True
-        pressed_keys=set()
-        WHITE=(255,255,255);BLACK=(0,0,0);GRAY=(50,50,50);RED=(255,0,0);BLUE_PRESSED=(50,150,255)
-        white_key_width=60;white_key_height=250
-        black_key_width=35;black_key_height=150
-        black_positions=[0,1,3,4,5,7,8,10,11,12]
+        running = True
+        pressed_keys = set()
+        WHITE, BLACK, GRAY, RED, BLUE_PRESSED = (255,255,255),(0,0,0),(50,50,50),(255,0,0),(50,150,255)
+        white_key_width, white_key_height = 60, 250
+        black_key_width, black_key_height = 35, 150
+        black_positions = [0,1,3,4,5,7,8,10,11,12]
 
         while running:
             for event in pygame.event.get():
-                if event.type==pygame.QUIT: running=False
-                elif event.type==pygame.KEYDOWN:
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
                     if event.key in self.note_sounds:
                         self.note_sounds[event.key].play()
                         pressed_keys.add(event.key)
                         self.recorded_notes.append(f"{self.KEY_NOTE_MAP[event.key]} {self.NOTE_DURATION:.3f}")
-                    elif event.key==pygame.K_ESCAPE: running=False
-                elif event.type==pygame.KEYUP:
+                    elif event.key == pygame.K_ESCAPE:
+                        running = False
+                elif event.type == pygame.KEYUP:
                     pressed_keys.discard(event.key)
 
             window.fill((30,30,30))
             for i,key in enumerate(white_keys_list):
-                color=RED if key in pressed_keys else WHITE
+                color = RED if key in pressed_keys else WHITE
                 pygame.draw.rect(window,color,(i*white_key_width,0,white_key_width,white_key_height))
                 pygame.draw.rect(window,BLACK,(i*white_key_width,0,white_key_width,white_key_height),2)
                 window.blit(font.render(pygame.key.name(key),True,BLACK),(i*white_key_width+10,white_key_height-30))
             for i,key in enumerate(black_keys_list):
-                if i<len(black_positions):
-                    x=black_positions[i]*white_key_width+white_key_width-black_key_width//2
-                    color=BLUE_PRESSED if key in pressed_keys else BLACK
+                if i < len(black_positions):
+                    x = black_positions[i]*white_key_width+white_key_width-black_key_width//2
+                    color = BLUE_PRESSED if key in pressed_keys else BLACK
                     pygame.draw.rect(window,color,(x,0,black_key_width,black_key_height))
                     pygame.draw.rect(window,GRAY,(x,0,black_key_width,black_key_height),2)
                     window.blit(font.render(pygame.key.name(key),True,WHITE),(x+5,30))
             pygame.display.flip()
 
-        with open(self.record_file,"w",encoding="utf-8") as f:
-            for line in self.recorded_notes: f.write(line+"\n")
-        print(f"💾 Enregistrement sauvegardé dans {self.record_file}")
+        # Ferme juste la fenêtre Pygame
         pygame.display.quit()
+
+        # --- Demande à l'utilisateur s'il veut sauvegarder ---
+        if not self.recorded_notes:
+            print("🎵 Aucune note enregistrée, rien à sauvegarder.")
+            return
+
+        sauvegarder = input("Voulez-vous sauvegarder les notes jouées ? (o/n) : ").strip().lower()
+        if sauvegarder == "o":
+            nom_fichier = input(f"Nom du fichier (laisser vide pour '{self.record_file}') : ").strip()
+            if not nom_fichier:
+                nom_fichier = self.record_file
+            with open(nom_fichier, "w", encoding="utf-8") as f:
+                for line in self.recorded_notes:
+                    f.write(line + "\n")
+            print(f"💾 Enregistrement sauvegardé dans {nom_fichier}")
+        else:
+            print("❌ Les notes ne seront pas sauvegardées.")
+
 
 
 # --- Menu principal ---
