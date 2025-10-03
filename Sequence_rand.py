@@ -109,7 +109,7 @@ def main():
 
     # Générer et jouer la séquence
     if length >= 100:
-        play_guitar_hero(length)
+        play_guitar_hero()
     else:
         seq = generate_random_sequence(length=length, mode=mode)
         for i, (note, freq, dur) in enumerate(seq, start=1):
