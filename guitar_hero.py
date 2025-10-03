@@ -4,10 +4,6 @@ from note_frequence_base import note_to_frequency
 from MusicPlayer_base_original import MusicPlayer
 
 
-def duration_generator():
-    return random.choice([2, 2.5, 3, 3.5, 4])
-
-
 def choose_notes():
     notes = list(note_to_frequency.keys())
     return random.sample(notes, 5)
@@ -21,26 +17,29 @@ def has_time_elapsed(start_time, duration):
     return (time.time() + duration) <= (start_time + duration)
 
 
-def play_guitar_hero(iterations):
+def play_guitar_hero():
     print("Bienvenue dans le jeu Guitar Hero !")
     correct = 0
     errors = 0
     mp = MusicPlayer()
     notes = choose_notes()
+    time_in_seconds = input("Combien de secondes voulez-vous jouer ? ")
+    time_in_seconds = int(time_in_seconds)
     keys = ["A", "Z", "E", "R", "T"]
     keys_and_notes = [(note, key) for note, key in zip(
-        random.choices(notes, k=iterations), random.choices(keys, k=iterations))]
-    for i in range(iterations):
-        duration = duration_generator()
-        start_time = time.time()
+        random.choices(notes, k=time_in_seconds), random.choices(keys, k=time_in_seconds))]
+    for i in range(time_in_seconds):
+        duration = 1
         print(
-            f"Appuyez sur {keys_and_notes[i][1]} pour jouer {keys_and_notes[i][0]} pendant {duration} secondes.")
+            f"{keys_and_notes[i][1]} pour jouer {keys_and_notes[i][0]}")
+        mp.play(note_to_frequency[keys_and_notes[i]
+                                  [0]], duration)
         pressed_key = input()
-        if has_note_been_pressed(keys_and_notes[i][1], pressed_key) and not has_time_elapsed(start_time, duration):
+
+        if has_note_been_pressed(keys_and_notes[i][1], pressed_key):
             print("Correct!")
-            mp.play(note_to_frequency[keys_and_notes[i]
-                    [0]], duration)
             correct += 1
+            continue
         else:
             print("Raté !")
             errors += 1
