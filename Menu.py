@@ -419,7 +419,7 @@ class Menu:
         self.instrument = None
         self.mode = None
         self.player = MusicPlayer()
-        self.enable_guitar_hero = False
+        self.enable_guitar_hero = None
 
     def afficher_menu_instruments(self):
         print("=== Choix de l'instrument ===")
